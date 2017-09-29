@@ -15,8 +15,11 @@ export default class Game
 
 		this.paddle = new Paddle(this.canvas.width, this.canvas.height);
 		this.ball = null;
+
 		this.bricks = [];
 		this.brickColors = ['grey', 'red', 'yellow', 'blue', 'green'];
+
+		// what a mess
 		for (var i = 0; i < this.brickRows; i++) {
 			for (var j = 0; j < this.brickColumns; j++) {
 				this.bricks.push(new Brick(this.canvas.width/this.brickColumns * j,
@@ -41,17 +44,14 @@ export default class Game
 	render()
 	{
 		this.ctx.save();
-		this.ctx.fillStyle = '#152DA4';
+		this.ctx.fillStyle = '#152DA4'; // dark blue
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 		this.ctx.restore();
 
 		for (var i = 0; i < this.bricks.length; i++) {
 			this.bricks[i].render(this.ctx);
 		}
-		/*this.bricks.forEach(function(brick)
-		{
-			brick.render(this.ctx);
-		});*/
+		
 		this.paddle.render(this.ctx);
 	}
 	loop()

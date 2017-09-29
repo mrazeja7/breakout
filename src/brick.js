@@ -10,11 +10,11 @@ export default class Brick
 		this.color = color;
 
 	}
-	checkHit(ball)
+	checkHit(ball) // checks whether the ball is colliding with the brick
 	{
 
 	}
-	hit()
+	hit() // remove a life or destroy the brick
 	{
 
 	}
