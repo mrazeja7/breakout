@@ -1,12 +1,12 @@
 export default class Paddle
 {
-	constructor(canvasW, canvasH)
+	constructor(canvasDims, ball)
 	{
-		this.width = 50;
+		this.width = 60;
 		this.height = 20;
-		this.canvasW = canvasW;
-		this.y = canvasH*4/5; // the paddle is located somewhere in the bottom fifth of the screen
-		this.x = (canvasW-50)/2; // around the middle of the screen
+		this.canvasDims = canvasDims;
+		this.y = this.canvasDims.height*4/5; // the paddle is located somewhere in the bottom fifth of the screen
+		this.x = (this.canvasDims.width-50)/2; // around the middle of the screen
 
 		this.speed = 0;
 		this.topSpeed = 10;
@@ -15,6 +15,16 @@ export default class Paddle
 		window.onkeydown = this.handleKeyDown.bind(this);
 		window.onkeyup = this.handleKeyUp.bind(this);
 		this.movement = null;
+		this.ball = ball;
+		this.ballFired = false;
+	}
+	fireBall()
+	{
+		if (this.ballFired)
+			return;
+		this.ballFired = true;
+		//this.ball.fire((this.x + this.width)/2, this.y);
+		this.ball.fire();
 	}
 	update()
 	{
@@ -23,20 +33,24 @@ export default class Paddle
 	handleKeyDown(event)
 	{
 		var key = event.key;
+		//console.log(key);
 	    switch(key)
 	    {
-	      case 'ArrowLeft':
-	      case 'a':
-	        this.movement = 'left';
-	        console.log('left');
-	        break;
-	      case 'ArrowRight':
-	      case 'd':
-	        this.movement = 'right';
-	        console.log('right');
-	        break;
-	      default:
-	        return;
+	    	case ' ':
+	    		this.fireBall();
+	    		break;
+	      	case 'ArrowLeft':
+	      	case 'a':
+		        this.movement = 'left';
+		        //console.log('left');
+		        break;
+	      	case 'ArrowRight':
+	      	case 'd':
+		        this.movement = 'right';
+		        //console.log('right');
+		        break;
+	      	default:
+	        	return;
 	    }
 	}
 	handleKeyUp(event)
@@ -49,7 +63,7 @@ export default class Paddle
 	      case 'ArrowRight':
 	      case 'd':
 	        this.movement = null;
-	        console.log('stop');
+	        //console.log('stop');
 	        break;
 	      default:
 	        return;
@@ -65,7 +79,7 @@ export default class Paddle
 				this.speed = -this.topSpeed;
 				break;
 			case 'right':
-				if ((this.x + this.width) > this.canvasW)
+				if ((this.x + this.width) > this.canvasDims.width)
 					return;
 				this.speed = this.topSpeed;
 				break;
@@ -75,6 +89,8 @@ export default class Paddle
 		}		
 
 		this.x += this.speed;
+		if (!this.ballFired)
+			this.ball.updatePos(this.x + this.width/2, this.y);
 	}
 	render(ctx)
 	{

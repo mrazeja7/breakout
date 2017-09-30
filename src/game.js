@@ -1,5 +1,6 @@
 import Paddle from './paddle'
 import Brick from './brick'
+import Ball from './ball'
 
 export default class Game
 {
@@ -13,8 +14,11 @@ export default class Game
 		this.brickColumns = 10;
 		this.ctx = this.canvas.getContext('2d');
 
-		this.paddle = new Paddle(this.canvas.width, this.canvas.height);
-		this.ball = null;
+		this.over = false;
+		this.score = 0;
+		this.ball = new Ball({width: this.canvas.width, height: this.canvas.height});
+		this.paddle = new Paddle({width: this.canvas.width, height: this.canvas.height}, this.ball);
+		
 
 		this.bricks = [];
 		this.brickColors = ['grey', 'red', 'yellow', 'blue', 'green'];
@@ -26,7 +30,7 @@ export default class Game
 									  this.canvas.height/6 + this.canvas.height/5/this.brickRows * i,
 									  this.canvas.width/this.brickColumns,
 									  this.canvas.height/5/this.brickRows,
-									  this.brickRows - i, this.brickColors[i]
+									  this.brickRows - i, this.brickColors[i], 5
 									  ));
 			}
 			
@@ -37,9 +41,44 @@ export default class Game
 	    this.loop = this.loop.bind(this);
 	    this.interval = setInterval(this.loop, 50);
 	}
+
+	gameOver()
+	{
+		if (this.ball.y >= this.canvas.height)
+		{
+			this.over = true;
+			this.lost();
+		}
+
+		if (this.bricks.length == 0)
+		{
+			this.over = true;
+			this.won();
+		}
+	}
+	won()
+	{
+		alert('You won!');
+	}
+	lost()
+	{
+		alert('You lost!');
+	}
 	update()
 	{
+		//this.gameOver();
 		this.paddle.update();
+		this.ball.update(this.paddle, this.bricks);
+		for (var i = 0; i < this.bricks.length; i++) 
+		{
+			if (!this.bricks[i].active)
+			{
+				this.score += this.bricks[i].points;
+				this.bricks.splice(i, 1);					
+			}
+			
+		}
+		//console.log(this.bricks.length);
 	}
 	render()
 	{
@@ -51,8 +90,14 @@ export default class Game
 		for (var i = 0; i < this.bricks.length; i++) {
 			this.bricks[i].render(this.ctx);
 		}
+
+		// render score
+		this.ctx.font = '16px Arial';
+		this.ctx.fillStyle = 'white';
+		this.ctx.fillText(('Score: ' + this.score), 5, this.canvas.height-16);
 		
 		this.paddle.render(this.ctx);
+		this.ball.render(this.ctx);
 	}
 	loop()
 	{

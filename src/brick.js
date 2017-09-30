@@ -1,6 +1,6 @@
 export default class Brick
 {
-	constructor(x, y, width, height, lives, color)
+	constructor(x, y, width, height, lives, color, points)
 	{
 		this.x = x;
 		this.y = y;
@@ -8,19 +8,19 @@ export default class Brick
 		this.height = height;
 		this.lives = lives;
 		this.color = color;
-
-	}
-	checkHit(ball) // checks whether the ball is colliding with the brick
-	{
+		this.active = true;
+		this.points = points;
 
 	}
 	hit() // remove a life or destroy the brick
 	{
-
+		this.lives--;
+		if (this.lives == 0)
+			this.destroy();
 	}
 	destroy()
 	{
-
+		this.active = false;
 	}
 	update()
 	{
@@ -28,6 +28,8 @@ export default class Brick
 	}
 	render(ctx)
 	{
+		if (!this.active)
+			return;
 		ctx.save();
 		ctx.fillStyle = this.color;
 		ctx.fillRect(this.x, this.y, this.width, this.height);
