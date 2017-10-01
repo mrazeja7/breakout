@@ -10,7 +10,7 @@ export default class Game
 		document.body.appendChild(this.canvas);
 		this.canvas.height = 600;
 		this.canvas.width = 500;
-		this.brickRows = 5;
+		this.brickRows = 6;
 		this.brickColumns = 10;
 		this.ctx = this.canvas.getContext('2d');
 
@@ -21,7 +21,7 @@ export default class Game
 		
 
 		this.bricks = [];
-		this.brickColors = ['grey', 'red', 'yellow', 'blue', 'green'];
+		this.brickColors = ['grey', 'red', 'yellow', 'blue', '#FF00FF', 'green'];
 
 		// what a mess
 		for (var i = 0; i < this.brickRows; i++) {
