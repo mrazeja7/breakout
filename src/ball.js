@@ -50,11 +50,18 @@ export default class Ball
 
 	paddleCollision(paddle)
 	{
+		if (this.yVelocity == 0)
+			return;
 		var diff = (this.y + this.radius - paddle.y);
+		// the ball is bouncing off the paddle		
 		if ((this.x + this.radius) > paddle.x
 		 && (this.x - this.radius) < (paddle.x + paddle.width)
 		 && diff >= 0 && diff <= 10)
-			this.bounce('up')  // the ball is bouncing off the paddle
+		{
+			// slightly adjust xVelocity based on the paddle "angle"
+			//this.xVelocity += (this.x - (paddle.x + paddle.width/2)) / 50;
+			this.bounce('up')  
+		}
 	}
 
 	brickCollision(bricks)
