@@ -19,7 +19,7 @@ export default class Ball
 	fire()
 	{
 		this.xVelocity = (this.x - this.canvasDims.width/2) / 30;
-		this.yVelocity = -5;
+		this.yVelocity = -4;
 		this.y -= 10;
 		
 		console.log('fire: ' + this.xVelocity + ' ' + this.yVelocity);
@@ -70,7 +70,8 @@ export default class Ball
 				&& (this.y + this.radius) >= bricks[i].y ) // the brick is hit from underneath
 			{
 				this.bounce('down');
-				bricks[i].hit();					
+				bricks[i].hit();
+				return;
 			}
 		}
 	}

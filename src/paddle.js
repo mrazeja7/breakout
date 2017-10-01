@@ -2,14 +2,15 @@ export default class Paddle
 {
 	constructor(canvasDims, ball)
 	{
-		this.width = 60;
+		this.width = 120;
 		this.height = 20;
+		this.triangularPartsLength = 15;
 		this.canvasDims = canvasDims;
 		this.y = this.canvasDims.height*4/5; // the paddle is located somewhere in the bottom fifth of the screen
 		this.x = (this.canvasDims.width-50)/2; // around the middle of the screen
 
 		this.speed = 0;
-		this.topSpeed = 10;
+		this.topSpeed = 7;
 		this.accel = 2;
 
 		window.onkeydown = this.handleKeyDown.bind(this);
@@ -74,12 +75,12 @@ export default class Paddle
 		switch(this.movement)
 		{
 			case 'left':
-				if (this.x < 0)
+				if (this.x <= 0)
 					return;
 				this.speed = -this.topSpeed;
 				break;
 			case 'right':
-				if ((this.x + this.width) > this.canvasDims.width)
+				if ((this.x + this.width) >= this.canvasDims.width)
 					return;
 				this.speed = this.topSpeed;
 				break;
@@ -94,9 +95,30 @@ export default class Paddle
 	}
 	render(ctx)
 	{
+		// TODO nicer shape (triangles at the ends?)
 		ctx.save();
 		ctx.fillStyle = 'black';
-		ctx.fillRect(this.x, this.y, this.width, this.height);
+		ctx.strokeStyle = 'silver';
+		ctx.fillRect(this.x + this.triangularPartsLength, this.y, this.width - this.triangularPartsLength*2, this.height);
+
+		ctx.fillStyle = '#BC0000';
+
+		ctx.beginPath();
+	    ctx.moveTo(this.x + this.triangularPartsLength, this.y);
+	    ctx.lineTo(this.x, this.y + this.height);
+	    ctx.lineTo(this.x + this.triangularPartsLength, this.y + this.height);
+	    ctx.fill();
+	    ctx.stroke();
+
+	    ctx.beginPath();
+	    ctx.moveTo(this.x + this.width - this.triangularPartsLength, this.y);
+	    ctx.lineTo(this.x + this.width, this.y + this.height);
+	    ctx.lineTo(this.x + this.width - this.triangularPartsLength, this.y + this.height);
+	    ctx.fill();
+	    ctx.stroke();
+
+		ctx.strokeRect(this.x + this.triangularPartsLength, this.y, this.width - this.triangularPartsLength*2, this.height);
+
 		ctx.restore();
 	}
 }
