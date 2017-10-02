@@ -63,6 +63,7 @@ export default class Ball
 		{
 			// slightly adjust xVelocity based on the paddle "angle"
 			//this.xVelocity += (this.x - (paddle.x + paddle.width/2)) / 50;
+			this.xVelocity = (this.x - (paddle.x + paddle.width/2)) / 20;
 			console.log('velocity: ' + this.xVelocity + ' ' + this.yVelocity);
 			this.bounce('up')  
 		}

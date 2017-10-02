@@ -26,14 +26,16 @@ export default class Game
 		this.brickColors = ['grey', 'red', 'yellow', 'blue', '#FF00FF', 'green'];
 
 		// what a mess
-		for (var i = 0; i < this.brickRows; i++) {
-			for (var j = 0; j < this.brickColumns; j++) {
+		for (var i = 0; i < this.brickRows; i++) 
+		{
+			for (var j = 0; j < this.brickColumns; j++) 
+			{
 				this.bricks.push(new Brick(this.canvas.width/this.brickColumns * j,
-									  this.canvas.height/6 + this.canvas.height/5/this.brickRows * i,
-									  this.canvas.width/this.brickColumns,
-									  this.canvas.height/5/this.brickRows,
-									  this.brickRows - i, this.brickColors[i], 5
-									  ));
+										   this.canvas.height/6 + this.canvas.height/5/this.brickRows * i,
+										   this.canvas.width/this.brickColumns,
+										   this.canvas.height/5/this.brickRows,
+										   this.brickRows - i, this.brickColors[i], 5
+										  ));
 			}
 			
 		}
@@ -55,15 +57,21 @@ export default class Game
 
 			clearInterval(this.interval);
 
-			if (this.lives === 0)
+			if (this.lives === 1)
 			{
 				// display a splash screen with the score
 				this.lossScreen();
 			}
 			else
 			{
-				// display a splash screen with either a "space to continue" prompt or a timeout
-				this.continueScreen();				
+				this.continueScreen();
+
+				// restart the game after a timeout
+				setTimeout(function() 
+		        {
+		        	document.body.removeChild(this.canvas);
+					this.constructor(this.lives-1, this.score);
+				}.bind(this), this.turnTimeout);	
 			}			
 		}
 
@@ -74,17 +82,58 @@ export default class Game
 			this.winScreen();
 		}
 	}
+	drawSplashScreen(color, text)
+	{
+		this.ctx.save();
+
+		this.ctx.fillStyle = color;		
+		this.ctx.fillRect(this.canvas.width/6, this.canvas.height/2, this.canvas.width*2/3, this.canvas.height*1/6);
+
+		// TODO plural
+		this.ctx.font = '16px courier';
+		this.ctx.fillStyle = 'white';
+		for (var i = 0; i < text.length; i++) 
+		{
+			this.ctx.fillText(text[i], this.canvas.width/2 - this.ctx.measureText(text[i]).width/2, (this.canvas.height*7/12 - 8 + 24*i));
+		}
+		this.ctx.restore();
+
+	}
 	winScreen()
 	{
-		alert('You cleared all the bricks! Your score is ' + this.score);
+		this.drawSplashScreen('#009900', ['You cleared all the bricks!',(' You scored ' + this.score + ' points.')]);
+		return;
 	}
 	lossScreen()
 	{
-		alert('You lost! Your score is ' + this.score);
+		//alert('You lost! Your score is ' + this.score);
+
+		this.drawSplashScreen('#990000',['You lost!',('You scored ' + this.score + ' points.')]);
+		return;
+
+		this.ctx.save();
+
+		this.ctx.fillStyle = '#990000';		
+		this.ctx.fillRect(this.canvas.width/6, this.canvas.height/2, this.canvas.width*2/3, this.canvas.height*1/6);
+		//this.ctx.strokeStyle = 'silver';
+		//this.ctx.strokeRect(this.canvas.width/6, this.canvas.height/2, this.canvas.width*2/3, this.canvas.height*1/6);
+
+		// TODO plural
+		this.ctx.font = '16px courier';
+		this.ctx.fillStyle = 'white';
+		var lost = ('You lost!');
+		var score = ('You scored ' + this.score + ' points.');
+		this.ctx.fillText(lost, this.canvas.width/2 - this.ctx.measureText(lost).width/2, this.canvas.height*7/12 - 8);
+		this.ctx.fillText(score, this.canvas.width/2 - this.ctx.measureText(score).width/2, this.canvas.height*7/12 + 16);
+		this.ctx.restore();
 	}
 	
 	continueScreen()
 	{
+		this.drawSplashScreen('#999900', [('You have ' + (this.lives-1) + ' balls left.'),
+										  ('Continuing in ' + this.turnTimeout/1000 + ' seconds...')]);
+		return;
+
 		this.ctx.save();
 
 		this.ctx.fillStyle = '#009900';		
@@ -92,19 +141,14 @@ export default class Game
 		//this.ctx.strokeStyle = 'silver';
 		//this.ctx.strokeRect(this.canvas.width/6, this.canvas.height/2, this.canvas.width*2/3, this.canvas.height*1/6);
 
+		// TODO plural
 		this.ctx.font = '16px courier';
 		this.ctx.fillStyle = 'white';
 		var balls = ('You have ' + (this.lives-1) + ' balls left.');
 		var continuing = ('Continuing in ' + this.turnTimeout/1000 + ' seconds...');
 		this.ctx.fillText(balls, this.canvas.width/2 - this.ctx.measureText(balls).width/2, this.canvas.height*7/12 - 8);
 		this.ctx.fillText(continuing, this.canvas.width/2 - this.ctx.measureText(continuing).width/2, this.canvas.height*7/12 + 16);
-		this.ctx.restore();		
-
-        setTimeout(function() 
-        {
-        	document.body.removeChild(this.canvas);
-			this.constructor(this.lives-1, this.score);
-		}.bind(this), this.turnTimeout);
+		this.ctx.restore();
 	}
 	update()
 	{
@@ -117,15 +161,11 @@ export default class Game
 		this.ball.update(this.paddle, this.bricks);
 
 		for (var i = 0; i < this.bricks.length; i++) 
-		{
 			if (!this.bricks[i].active)
 			{
 				this.score += this.bricks[i].points;
 				this.bricks.splice(i, 1);					
 			}
-			
-		}
-		//console.log(this.bricks.length);
 	}
 	render()
 	{
@@ -137,9 +177,8 @@ export default class Game
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 		
 
-		for (var i = 0; i < this.bricks.length; i++) {
-			this.bricks[i].render(this.ctx);
-		}
+		for (var i = 0; i < this.bricks.length; i++)
+			this.bricks[i].render(this.ctx);		
 
 		// render score
 		this.ctx.font = '16px courier';
@@ -147,8 +186,8 @@ export default class Game
 		this.ctx.fillText(('Score: ' + this.score), 5, this.canvas.height-10);
 
 		// render remaining lives
-		var lives = ('Lives: ' + this.lives);
-		this.ctx.fillText(('Lives: ') + this.lives, this.canvas.width - this.ctx.measureText(lives).width - 5, this.canvas.height-10);
+		var lives = ('Lives: ' + (this.lives-1));
+		this.ctx.fillText(lives, this.canvas.width - this.ctx.measureText(lives).width - 5, this.canvas.height-10);
 		
 		this.paddle.render(this.ctx);
 		this.ball.render(this.ctx);
