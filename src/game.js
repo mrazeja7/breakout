@@ -4,7 +4,7 @@ import Ball from './ball'
 
 export default class Game
 {
-	constructor()
+	constructor(lives)
 	{
 		this.canvas = document.createElement('canvas');
 		document.body.appendChild(this.canvas);
@@ -16,6 +16,7 @@ export default class Game
 
 		this.over = false;
 		this.score = 0;
+		this.lives = lives;
 		this.ball = new Ball({width: this.canvas.width, height: this.canvas.height});
 		this.paddle = new Paddle({width: this.canvas.width, height: this.canvas.height}, this.ball);
 		
@@ -42,33 +43,41 @@ export default class Game
 	    this.interval = setInterval(this.loop, 10);
 	}
 	// TODO
-	gameOver()
+	checkGameOver()
 	{
-		if (this.ball.y >= this.canvas.height)
+		if (this.ball.outOfBounds())
 		{
 			this.over = true;
-			this.lost();
+			this.lossScreen();
 		}
 
-		if (this.bricks.length == 0)
+		if (this.bricks.length === 0)
 		{
 			this.over = true;
-			this.won();
+			this.winScreen();
 		}
 	}
-	won()
+	winScreen()
 	{
 		alert('You won!');
 	}
-	lost()
+	lossScreen()
 	{
 		alert('You lost!');
+		document.body.removeChild(this.canvas);
+		clearInterval(this.interval);
+		this.constructor(this.lives-1);
 	}
 	update()
 	{
-		//this.gameOver();
+		if (this.over)
+			return;
+
+		this.checkGameOver();
+
 		this.paddle.update();
 		this.ball.update(this.paddle, this.bricks);
+
 		for (var i = 0; i < this.bricks.length; i++) 
 		{
 			if (!this.bricks[i].active)
@@ -85,19 +94,23 @@ export default class Game
 		this.ctx.save();
 		this.ctx.fillStyle = '#152DA4'; // dark blue
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-		this.ctx.restore();
+		
 
 		for (var i = 0; i < this.bricks.length; i++) {
 			this.bricks[i].render(this.ctx);
 		}
 
 		// render score
-		this.ctx.font = '16px Arial';
+		this.ctx.font = '16px courier';
 		this.ctx.fillStyle = 'white';
-		this.ctx.fillText(('Score: ' + this.score), 5, this.canvas.height-16);
+		this.ctx.fillText(('Score: ' + this.score), 5, this.canvas.height-10);
+
+		// render remaining lives
+		this.ctx.fillText(('Lives: ') + this.lives, this.canvas.width - 85, this.canvas.height-10);
 		
 		this.paddle.render(this.ctx);
 		this.ball.render(this.ctx);
+		this.ctx.restore();
 	}
 	loop()
 	{

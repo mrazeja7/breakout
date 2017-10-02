@@ -15,7 +15,7 @@ export default class Brick
 	hit() // remove a life or destroy the brick
 	{
 		this.lives--;
-		if (this.lives == 0)
+		if (this.lives === 0)
 			this.destroy();
 	}
 	destroy()

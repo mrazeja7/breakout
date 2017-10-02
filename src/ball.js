@@ -34,7 +34,10 @@ export default class Ball
 		this.y += this.yVelocity;
 		//console.log('update: ' + this.x + ' ' + this.y);
 	}
-
+	outOfBounds()
+	{
+		return (this.y > this.canvasDims.height);
+	}
 	wallCollision()
 	{
 		var arg = '';
@@ -50,7 +53,7 @@ export default class Ball
 
 	paddleCollision(paddle)
 	{
-		if (this.yVelocity == 0)
+		if (this.yVelocity === 0)
 			return;
 		var diff = (this.y + this.radius - paddle.y);
 		// the ball is bouncing off the paddle		
@@ -60,6 +63,7 @@ export default class Ball
 		{
 			// slightly adjust xVelocity based on the paddle "angle"
 			//this.xVelocity += (this.x - (paddle.x + paddle.width/2)) / 50;
+			console.log('velocity: ' + this.xVelocity + ' ' + this.yVelocity);
 			this.bounce('up')  
 		}
 	}
