@@ -4,7 +4,7 @@ import Ball from './ball'
 
 export default class Game
 {
-	constructor(lives)
+	constructor(lives, score)
 	{
 		this.canvas = document.createElement('canvas');
 		document.body.appendChild(this.canvas);
@@ -15,8 +15,9 @@ export default class Game
 		this.ctx = this.canvas.getContext('2d');
 
 		this.over = false;
-		this.score = 0;
+		this.score = score;
 		this.lives = lives;
+		this.turnTimeout = 3000;
 		this.ball = new Ball({width: this.canvas.width, height: this.canvas.height});
 		this.paddle = new Paddle({width: this.canvas.width, height: this.canvas.height}, this.ball);
 		
@@ -36,10 +37,13 @@ export default class Game
 			}
 			
 		}
-		
+
 		this.update = this.update.bind(this);
 	    this.render = this.render.bind(this);
 	    this.loop = this.loop.bind(this);
+	    this.winScreen = this.winScreen.bind(this);
+	    this.lossScreen = this.lossScreen.bind(this);
+	    this.continueScreen = this.continueScreen.bind(this);
 	    this.interval = setInterval(this.loop, 10);
 	}
 	// TODO
@@ -48,25 +52,59 @@ export default class Game
 		if (this.ball.outOfBounds())
 		{
 			this.over = true;
-			this.lossScreen();
+
+			clearInterval(this.interval);
+
+			if (this.lives === 0)
+			{
+				// display a splash screen with the score
+				this.lossScreen();
+			}
+			else
+			{
+				// display a splash screen with either a "space to continue" prompt or a timeout
+				this.continueScreen();				
+			}			
 		}
 
 		if (this.bricks.length === 0)
 		{
+			clearInterval(this.interval);
 			this.over = true;
 			this.winScreen();
 		}
 	}
 	winScreen()
 	{
-		alert('You won!');
+		alert('You cleared all the bricks! Your score is ' + this.score);
 	}
 	lossScreen()
 	{
-		alert('You lost!');
-		document.body.removeChild(this.canvas);
-		clearInterval(this.interval);
-		this.constructor(this.lives-1);
+		alert('You lost! Your score is ' + this.score);
+	}
+	
+	continueScreen()
+	{
+		this.ctx.save();
+
+		this.ctx.fillStyle = '#009900';		
+		this.ctx.fillRect(this.canvas.width/6, this.canvas.height/2, this.canvas.width*2/3, this.canvas.height*1/6);
+		//this.ctx.strokeStyle = 'silver';
+		//this.ctx.strokeRect(this.canvas.width/6, this.canvas.height/2, this.canvas.width*2/3, this.canvas.height*1/6);
+
+		this.ctx.font = '16px courier';
+		this.ctx.fillStyle = 'white';
+		var balls = ('You have ' + (this.lives-1) + ' balls left.');
+		var continuing = ('Continuing in ' + this.turnTimeout/1000 + ' seconds...');
+		this.ctx.fillText(balls, this.canvas.width/2 - this.ctx.measureText(balls).width/2, this.canvas.height*7/12 - 8);
+		this.ctx.fillText(continuing, this.canvas.width/2 - this.ctx.measureText(continuing).width/2, this.canvas.height*7/12 + 16);
+		this.ctx.restore();		
+
+        setTimeout(function() 
+        {
+        	document.body.removeChild(this.canvas);
+			this.constructor(this.lives-1, this.score);
+		}.bind(this), this.turnTimeout);
 	}
 	update()
 	{
@@ -91,6 +129,9 @@ export default class Game
 	}
 	render()
 	{
+		if (this.over)
+			return;
+
 		this.ctx.save();
 		this.ctx.fillStyle = '#152DA4'; // dark blue
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -106,7 +147,8 @@ export default class Game
 		this.ctx.fillText(('Score: ' + this.score), 5, this.canvas.height-10);
 
 		// render remaining lives
-		this.ctx.fillText(('Lives: ') + this.lives, this.canvas.width - 85, this.canvas.height-10);
+		var lives = ('Lives: ' + this.lives);
+		this.ctx.fillText(('Lives: ') + this.lives, this.canvas.width - this.ctx.measureText(lives).width - 5, this.canvas.height-10);
 		
 		this.paddle.render(this.ctx);
 		this.ball.render(this.ctx);

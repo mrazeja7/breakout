@@ -1,3 +1,3 @@
 import Game from './game';
 
-const game = new Game(3);
+const game = new Game(3, 0);
