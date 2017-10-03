@@ -2,16 +2,15 @@ export default class Paddle
 {
 	constructor(canvasDims, ball)
 	{
-		this.width = 120;
+		this.width = 200;
 		this.height = 20;
-		this.triangularPartsLength = 15;
+		this.triangularPartsLength = 20;
 		this.canvasDims = canvasDims;
 		this.y = this.canvasDims.height*4/5; // the paddle is located somewhere in the bottom fifth of the screen
 		this.x = (this.canvasDims.width - this.width)/2; // around the middle of the screen
 
 		this.speed = 0;
 		this.topSpeed = 7;
-		this.accel = 2;
 
 		window.onkeydown = this.handleKeyDown.bind(this);
 		window.onkeyup = this.handleKeyUp.bind(this);

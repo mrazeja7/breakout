@@ -20,21 +20,25 @@ export default class Game
 		this.turnTimeout = 3000;
 		this.ball = new Ball({width: this.canvas.width, height: this.canvas.height});
 		this.paddle = new Paddle({width: this.canvas.width, height: this.canvas.height}, this.ball);
+		this.speedLevel = 1;
 		
 
 		this.bricks = [];
 		this.brickColors = ['grey', 'red', 'yellow', 'blue', '#FF00FF', 'green'];
 
 		// what a mess
-		for (var i = 0; i < this.brickRows; i++) 
+		for (var i = 0; i < this.brickRows; i++)
 		{
-			for (var j = 0; j < this.brickColumns; j++) 
+			for (var j = 0; j < this.brickColumns; j++)
 			{
+				// 						  (x, y, width, height, lives, color, points)
 				this.bricks.push(new Brick(this.canvas.width/this.brickColumns * j,
 										   this.canvas.height/6 + this.canvas.height/5/this.brickRows * i,
 										   this.canvas.width/this.brickColumns,
 										   this.canvas.height/5/this.brickRows,
-										   this.brickRows - i, this.brickColors[i], 5
+										   /*this.brickRows - i*/ 1, 
+										   this.brickColors[i], 
+										   5*(this.brickRows-i)
 										  ));
 			}
 			
@@ -48,7 +52,6 @@ export default class Game
 	    this.continueScreen = this.continueScreen.bind(this);
 	    this.interval = setInterval(this.loop, 10);
 	}
-	// TODO
 	checkGameOver()
 	{
 		if (this.ball.outOfBounds())
@@ -58,10 +61,7 @@ export default class Game
 			clearInterval(this.interval);
 
 			if (this.lives === 1)
-			{
-				// display a splash screen with the score
 				this.lossScreen();
-			}
 			else
 			{
 				this.continueScreen();
@@ -82,6 +82,20 @@ export default class Game
 			this.winScreen();
 		}
 	}
+	winScreen()
+	{
+		this.drawSplashScreen('#009900', ['You cleared all the bricks!',(' You scored ' + this.score + ' points.')]);
+	}
+	lossScreen()
+	{
+		this.drawSplashScreen('#990000',['You lost!',('You scored ' + this.score + ' points.')]);
+	}
+	
+	continueScreen()
+	{
+		this.drawSplashScreen('#999900', [('You have ' + (this.lives-1) + ' ball' + (this.lives-1==1?'':'s') +  ' left.'),
+										  ('Continuing in ' + this.turnTimeout/1000 + ' seconds...')]);
+	}
 	drawSplashScreen(color, text)
 	{
 		this.ctx.save();
@@ -89,71 +103,28 @@ export default class Game
 		this.ctx.fillStyle = color;		
 		this.ctx.fillRect(this.canvas.width/6, this.canvas.height/2, this.canvas.width*2/3, this.canvas.height*1/6);
 
-		// TODO plural
 		this.ctx.font = '16px courier';
 		this.ctx.fillStyle = 'white';
+
 		for (var i = 0; i < text.length; i++) 
 		{
-			this.ctx.fillText(text[i], this.canvas.width/2 - this.ctx.measureText(text[i]).width/2, (this.canvas.height*7/12 - 8 + 24*i));
+			this.ctx.fillText(text[i], this.canvas.width/2 - this.ctx.measureText(text[i]).width/2, 
+				(this.canvas.height*7/12 - 8 + 24*i));
 		}
 		this.ctx.restore();
 
-	}
-	winScreen()
-	{
-		this.drawSplashScreen('#009900', ['You cleared all the bricks!',(' You scored ' + this.score + ' points.')]);
-		return;
-	}
-	lossScreen()
-	{
-		//alert('You lost! Your score is ' + this.score);
-
-		this.drawSplashScreen('#990000',['You lost!',('You scored ' + this.score + ' points.')]);
-		return;
-
-		this.ctx.save();
-
-		this.ctx.fillStyle = '#990000';		
-		this.ctx.fillRect(this.canvas.width/6, this.canvas.height/2, this.canvas.width*2/3, this.canvas.height*1/6);
-		//this.ctx.strokeStyle = 'silver';
-		//this.ctx.strokeRect(this.canvas.width/6, this.canvas.height/2, this.canvas.width*2/3, this.canvas.height*1/6);
-
-		// TODO plural
-		this.ctx.font = '16px courier';
-		this.ctx.fillStyle = 'white';
-		var lost = ('You lost!');
-		var score = ('You scored ' + this.score + ' points.');
-		this.ctx.fillText(lost, this.canvas.width/2 - this.ctx.measureText(lost).width/2, this.canvas.height*7/12 - 8);
-		this.ctx.fillText(score, this.canvas.width/2 - this.ctx.measureText(score).width/2, this.canvas.height*7/12 + 16);
-		this.ctx.restore();
-	}
-	
-	continueScreen()
-	{
-		this.drawSplashScreen('#999900', [('You have ' + (this.lives-1) + ' balls left.'),
-										  ('Continuing in ' + this.turnTimeout/1000 + ' seconds...')]);
-		return;
-
-		this.ctx.save();
-
-		this.ctx.fillStyle = '#009900';		
-		this.ctx.fillRect(this.canvas.width/6, this.canvas.height/2, this.canvas.width*2/3, this.canvas.height*1/6);
-		//this.ctx.strokeStyle = 'silver';
-		//this.ctx.strokeRect(this.canvas.width/6, this.canvas.height/2, this.canvas.width*2/3, this.canvas.height*1/6);
-
-		// TODO plural
-		this.ctx.font = '16px courier';
-		this.ctx.fillStyle = 'white';
-		var balls = ('You have ' + (this.lives-1) + ' balls left.');
-		var continuing = ('Continuing in ' + this.turnTimeout/1000 + ' seconds...');
-		this.ctx.fillText(balls, this.canvas.width/2 - this.ctx.measureText(balls).width/2, this.canvas.height*7/12 - 8);
-		this.ctx.fillText(continuing, this.canvas.width/2 - this.ctx.measureText(continuing).width/2, this.canvas.height*7/12 + 16);
-		this.ctx.restore();
 	}
 	update()
 	{
 		if (this.over)
 			return;
+
+		if (this.score >= 200*this.speedLevel)
+		{
+			this.ball.speedUp(1.25);
+			this.speedLevel++;
+			console.log('the ball is now faster');
+		}
 
 		this.checkGameOver();
 
@@ -173,7 +144,7 @@ export default class Game
 			return;
 
 		this.ctx.save();
-		this.ctx.fillStyle = '#152DA4'; // dark blue
+		this.ctx.fillStyle = '#2222AA'; // dark blue
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 		
 

@@ -31,7 +31,7 @@ export default class Brick
 		if (!this.active)
 			return;
 		ctx.save();
-		ctx.fillStyle = this.color;
+		ctx.fillStyle = this.color;		
 		ctx.fillRect(this.x, this.y, this.width, this.height);
 		ctx.strokeRect(this.x, this.y, this.width, this.height);
 		ctx.restore();

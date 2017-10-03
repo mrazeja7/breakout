@@ -8,21 +8,21 @@ export default class Ball
 		this.yVelocity = 0;
 		this.radius = 10;
 		this.canvasDims = canvasDims;
-		//this.wallCollision = this.wallCollision.bind(this);
 	}
 	updatePos(x, y)
 	{
 		this.x = Math.floor(x);
 		this.y = Math.floor(y) - this.radius;
-		//console.log('pos updated to ' + this.x + ' ' + this.y);
+	}
+	speedUp(factor)
+	{
+		this.yVelocity *= factor;		
 	}
 	fire()
 	{
 		this.xVelocity = (this.x - this.canvasDims.width/2) / 30;
 		this.yVelocity = -4;
 		this.y -= 10;
-		
-		console.log('fire: ' + this.xVelocity + ' ' + this.yVelocity);
 	}
 	update(paddle, bricks)
 	{
@@ -32,7 +32,6 @@ export default class Ball
 
 		this.x += this.xVelocity;
 		this.y += this.yVelocity;
-		//console.log('update: ' + this.x + ' ' + this.y);
 	}
 	outOfBounds()
 	{
@@ -61,10 +60,8 @@ export default class Ball
 		 && (this.x - this.radius) < (paddle.x + paddle.width)
 		 && diff >= 0 && diff <= 10)
 		{
-			// slightly adjust xVelocity based on the paddle "angle"
-			//this.xVelocity += (this.x - (paddle.x + paddle.width/2)) / 50;
+			// change xVelocity based on the collision "angle"
 			this.xVelocity = (this.x - (paddle.x + paddle.width/2)) / 20;
-			console.log('velocity: ' + this.xVelocity + ' ' + this.yVelocity);
 			this.bounce('up')  
 		}
 	}
@@ -76,12 +73,48 @@ export default class Ball
 			if (!bricks[i].active)
 				continue;
 
+			// the brick is hit from underneath
 			if ((this.x + this.radius) > bricks[i].x 
 				&& (this.x - this.radius) < (bricks[i].x + bricks[i].width) 
-				&& (this.y - this.radius) <= (bricks[i].y + bricks[i].height)
-				&& (this.y + this.radius) >= bricks[i].y ) // the brick is hit from underneath
+				&& (this.y - this.radius - (bricks[i].y + bricks[i].height)) <= 0
+				&& (this.y - this.radius - (bricks[i].y + bricks[i].height)) >= -10 
+				&& this.yVelocity < 0)				
 			{
 				this.bounce('down');
+				bricks[i].hit();
+				return;
+			}
+			// the brick is hit from above
+			if ((this.x + this.radius) > bricks[i].x
+				&& (this.x - this.radius) < (bricks[i].x + bricks[i].width) 
+				&& (this.y + this.radius - (bricks[i].y)) >= 0
+				&& (this.y + this.radius - (bricks[i].y)) <= 10 
+				&& this.yVelocity > 0)				
+			{
+				this.bounce('up');
+				bricks[i].hit();
+				return;
+			}
+			// the brick is hit from the left side
+			if ((this.y - this.radius) < bricks[i].y + bricks[i].height
+				&& (this.y + this.radius) > (bricks[i].y)
+				&& (this.x + this.radius - bricks[i].x) >= 0
+				&& (this.x + this.radius - bricks[i].x) <= 10
+				&& this.xVelocity > 0)			
+			{
+				this.bounce('right');
+				bricks[i].hit();
+				return;
+
+			}
+			// the brick is hit from the right side
+			if ((this.y - this.radius) < bricks[i].y + bricks[i].height
+				&& (this.y + this.radius) > (bricks[i].y)
+				&& (this.x - this.radius - bricks[i].x - bricks[i].width) >= 0
+				&& (this.x - this.radius - bricks[i].x - bricks[i].width) <= 10
+				&& this.xVelocity < 0)				
+			{
+				this.bounce('left');
 				bricks[i].hit();
 				return;
 			}
@@ -109,7 +142,13 @@ export default class Ball
 	{
 		ctx.save();
 		ctx.beginPath();
-		ctx.fillStyle = 'white';
+		ctx.fillStyle = 'white';	
+
+	    /*ctx.shadowColor = '#000000';
+		ctx.shadowBlur = 20;
+		ctx.shadowOffsetX = 5;
+		ctx.shadowOffsetY = 5;*/
+
 		ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
 		ctx.fill();
 		ctx.closePath();
