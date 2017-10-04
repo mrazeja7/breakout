@@ -15,16 +15,13 @@ export default class Brick
 	hit() // remove a life or destroy the brick
 	{
 		this.lives--;
+		new Audio('sounds/brick.wav').play();
 		if (this.lives === 0)
 			this.destroy();
 	}
 	destroy()
 	{
-		this.active = false;
-	}
-	update()
-	{
-
+		this.active = false;		
 	}
 	render(ctx)
 	{

@@ -8,6 +8,7 @@ export default class Ball
 		this.yVelocity = 0;
 		this.radius = 10;
 		this.canvasDims = canvasDims;
+		this.speedFactor = 1;
 	}
 	updatePos(x, y)
 	{
@@ -16,13 +17,18 @@ export default class Ball
 	}
 	speedUp(factor)
 	{
-		this.yVelocity *= factor;		
+		this.speedFactor *= factor;	
+		if (this.speedFactor > 4)
+			this.speedFactor = 4;	
+		if (this.yVelocity !== 0)
+			new Audio('sounds/speedup.wav').play();
 	}
 	fire()
 	{
 		this.xVelocity = (this.x - this.canvasDims.width/2) / 30;
-		this.yVelocity = -4;
+		this.yVelocity = -4 * this.speedFactor;
 		this.y -= 10;
+		new Audio('sounds/fire.wav').play();
 	}
 	update(paddle, bricks)
 	{
@@ -31,7 +37,7 @@ export default class Ball
 		this.brickCollision(bricks);
 
 		this.x += this.xVelocity;
-		this.y += this.yVelocity;
+		this.y += this.yVelocity * this.speedFactor;
 	}
 	outOfBounds()
 	{
@@ -47,6 +53,8 @@ export default class Ball
 		if (this.y <= this.radius)
 			arg = 'down';
 
+		if (arg !== '')
+			new Audio('sounds/wallbounce.wav').play();
 		this.bounce(arg);
 	}
 
@@ -61,8 +69,9 @@ export default class Ball
 		 && diff >= 0 && diff <= 10)
 		{
 			// change xVelocity based on the collision "angle"
-			this.xVelocity = (this.x - (paddle.x + paddle.width/2)) / 20;
-			this.bounce('up')  
+			this.xVelocity = (this.x - (paddle.x + paddle.width/2)) / 20;			
+			new Audio('sounds/paddlebounce.wav').play();
+			this.bounce('up')
 		}
 	}
 
@@ -143,11 +152,6 @@ export default class Ball
 		ctx.save();
 		ctx.beginPath();
 		ctx.fillStyle = 'white';	
-
-	    /*ctx.shadowColor = '#000000';
-		ctx.shadowBlur = 20;
-		ctx.shadowOffsetX = 5;
-		ctx.shadowOffsetY = 5;*/
 
 		ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
 		ctx.fill();

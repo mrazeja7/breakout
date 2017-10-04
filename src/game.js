@@ -19,9 +19,8 @@ export default class Game
 		this.lives = lives;
 		this.turnTimeout = 3000;
 		this.ball = new Ball({width: this.canvas.width, height: this.canvas.height});
-		this.paddle = new Paddle({width: this.canvas.width, height: this.canvas.height}, this.ball);
 		this.speedLevel = 1;
-		
+		this.paddle = new Paddle({width: this.canvas.width, height: this.canvas.height}, this.ball);		
 
 		this.bricks = [];
 		this.brickColors = ['grey', 'red', 'yellow', 'blue', '#FF00FF', 'green'];
@@ -42,7 +41,7 @@ export default class Game
 										  ));
 			}
 			
-		}
+		}		
 
 		this.update = this.update.bind(this);
 	    this.render = this.render.bind(this);
@@ -84,16 +83,27 @@ export default class Game
 	}
 	winScreen()
 	{
+		new Audio('sounds/win.wav').play();
 		this.drawSplashScreen('#009900', ['You cleared all the bricks!',(' You scored ' + this.score + ' points.')]);
 	}
 	lossScreen()
 	{
+		new Audio('sounds/loss.wav').play();
 		this.drawSplashScreen('#990000',['You lost!',('You scored ' + this.score + ' points.')]);
+
+		var d = document.createElement('div');
+		document.body.appendChild(d);
+		d.textContent = 'Sound credit: '
+		var link = document.createElement('a');
+		link.setAttribute('href', 'https://opengameart.org/content/8-bit-sound-effects-library');
+		link.innerHTML = 'https://opengameart.org/content/8-bit-sound-effects-library';
+		d.appendChild(link);		
 	}
 	
 	continueScreen()
 	{
-		this.drawSplashScreen('#999900', [('You have ' + (this.lives-1) + ' ball' + (this.lives-1==1?'':'s') +  ' left.'),
+		new Audio('sounds/round.wav').play();
+		this.drawSplashScreen('#999900', [('You have ' + (this.lives-1) + ' ball' + (this.lives-1===1?'':'s') +  ' left.'),
 										  ('Continuing in ' + this.turnTimeout/1000 + ' seconds...')]);
 	}
 	drawSplashScreen(color, text)
@@ -119,11 +129,11 @@ export default class Game
 		if (this.over)
 			return;
 
-		if (this.score >= 200*this.speedLevel)
+		if (this.score >= 300*this.speedLevel)
 		{
 			this.ball.speedUp(1.25);
-			this.speedLevel++;
-			console.log('the ball is now faster');
+			this.speedLevel*= 1.6;
+			//console.log('the ball is now faster');
 		}
 
 		this.checkGameOver();
