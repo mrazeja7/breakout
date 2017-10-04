@@ -23,6 +23,7 @@ export default class Game
 		this.paddle = new Paddle({width: this.canvas.width, height: this.canvas.height}, this.ball);		
 
 		this.bricks = [];
+		this.explosions = [];
 		this.brickColors = ['grey', 'red', 'yellow', 'blue', '#FF00FF', 'green'];
 
 		// what a mess
@@ -35,7 +36,7 @@ export default class Game
 										   this.canvas.height/6 + this.canvas.height/5/this.brickRows * i,
 										   this.canvas.width/this.brickColumns,
 										   this.canvas.height/5/this.brickRows,
-										   /*this.brickRows - i*/ 1, 
+										   1, 
 										   this.brickColors[i], 
 										   5*(this.brickRows-i)
 										  ));
@@ -91,6 +92,7 @@ export default class Game
 		new Audio('sounds/loss.wav').play();
 		this.drawSplashScreen('#990000',['You lost!',('You scored ' + this.score + ' points.')]);
 
+		// draw the credits
 		var d = document.createElement('div');
 		document.body.appendChild(d);
 		d.textContent = 'Sound credit: '
@@ -129,11 +131,10 @@ export default class Game
 		if (this.over)
 			return;
 
-		if (this.score >= 300*this.speedLevel)
+		if (this.score >= 200*this.speedLevel)
 		{
 			this.ball.speedUp(1.25);
-			this.speedLevel*= 1.6;
-			//console.log('the ball is now faster');
+			this.speedLevel*= 1.75;
 		}
 
 		this.checkGameOver();
@@ -144,8 +145,10 @@ export default class Game
 		for (var i = 0; i < this.bricks.length; i++) 
 			if (!this.bricks[i].active)
 			{
+				// mark the brick as exploding
 				this.score += this.bricks[i].points;
-				this.bricks.splice(i, 1);					
+				this.explosions.push(this.bricks[i]);
+				this.bricks.splice(i, 1);				
 			}
 	}
 	render()
@@ -153,25 +156,34 @@ export default class Game
 		if (this.over)
 			return;
 
+		// render the background
 		this.ctx.save();
 		this.ctx.fillStyle = '#2222AA'; // dark blue
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 		
 
 		for (var i = 0; i < this.bricks.length; i++)
-			this.bricks[i].render(this.ctx);		
+			this.bricks[i].render(this.ctx);	
 
+		// render all exploding bricks
+		for (var i = 0; i < this.explosions.length; i++) 
+		{
+			if (this.explosions[i].exploding === false)
+				this.explosions.splice(i, 1);
+			else
+				this.explosions[i].render(this.ctx);
+		}	
+
+		this.paddle.render(this.ctx);
+		this.ball.render(this.ctx);
 		// render score
 		this.ctx.font = '16px courier';
 		this.ctx.fillStyle = 'white';
-		this.ctx.fillText(('Score: ' + this.score), 5, this.canvas.height-10);
-
+		this.ctx.fillText(('Score: ' + this.score), 5, this.canvas.height-10);	
 		// render remaining lives
 		var lives = ('Lives: ' + (this.lives-1));
 		this.ctx.fillText(lives, this.canvas.width - this.ctx.measureText(lives).width - 5, this.canvas.height-10);
-		
-		this.paddle.render(this.ctx);
-		this.ball.render(this.ctx);
+			
 		this.ctx.restore();
 	}
 	loop()

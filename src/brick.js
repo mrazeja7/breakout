@@ -8,8 +8,14 @@ export default class Brick
 		this.height = height;
 		this.lives = lives;
 		this.color = color;
-		this.active = true;
 		this.points = points;
+		this.active = true;
+		
+		this.exploding = false;
+		this.explosion = [];
+		this.explosion.frames = 30;
+		this.explosion.xSteps = this.width/(2*this.explosion.frames);
+		this.explosion.ySteps = this.height/(2*this.explosion.frames);
 
 	}
 	hit() // remove a life or destroy the brick
@@ -22,12 +28,26 @@ export default class Brick
 	destroy()
 	{
 		this.active = false;		
+		this.exploding = true;
 	}
 	render(ctx)
 	{
-		if (!this.active)
-			return;
 		ctx.save();
+		if (this.exploding)
+		{
+			this.explosion.frames--;
+			
+			ctx.globalAlpha = this.explosion.frames/30;
+
+			this.x += this.explosion.xSteps;
+			this.width -= 2*this.explosion.xSteps;
+
+			this.y += this.explosion.ySteps;
+			this.height -= 2*this.explosion.ySteps;
+
+			if (this.explosion.frames === 0)
+				this.exploding = false;
+		}
 		ctx.fillStyle = this.color;		
 		ctx.fillRect(this.x, this.y, this.width, this.height);
 		ctx.strokeRect(this.x, this.y, this.width, this.height);

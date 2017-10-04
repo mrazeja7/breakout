@@ -8,6 +8,7 @@ export default class Ball
 		this.yVelocity = 0;
 		this.radius = 10;
 		this.canvasDims = canvasDims;
+		this.fired = false;
 		this.speedFactor = 1;
 	}
 	updatePos(x, y)
@@ -18,9 +19,7 @@ export default class Ball
 	speedUp(factor)
 	{
 		this.speedFactor *= factor;	
-		if (this.speedFactor > 4)
-			this.speedFactor = 4;	
-		if (this.yVelocity !== 0)
+		if (this.fired)
 			new Audio('sounds/speedup.wav').play();
 	}
 	fire()
@@ -29,6 +28,7 @@ export default class Ball
 		this.yVelocity = -4 * this.speedFactor;
 		this.y -= 10;
 		new Audio('sounds/fire.wav').play();
+		this.fired = true;
 	}
 	update(paddle, bricks)
 	{
@@ -60,7 +60,7 @@ export default class Ball
 
 	paddleCollision(paddle)
 	{
-		if (this.yVelocity === 0)
+		if (!this.fired)
 			return;
 		var diff = (this.y + this.radius - paddle.y);
 		// the ball is bouncing off the paddle		

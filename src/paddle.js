@@ -4,6 +4,7 @@ export default class Paddle
 	{
 		this.width = 200;
 		this.height = 20;
+		// length of the triangular ramps at the ends
 		this.triangularPartsLength = 20;
 		this.canvasDims = canvasDims;
 		this.y = this.canvasDims.height*4/5; // the paddle is located somewhere in the bottom fifth of the screen
@@ -16,14 +17,12 @@ export default class Paddle
 		window.onkeyup = this.handleKeyUp.bind(this);
 		this.movement = null;
 		this.ball = ball;
-		this.ballFired = false;
+		//this.ball.fired = false;
 	}
 	fireBall()
 	{
-		if (this.ballFired)
+		if (this.ball.fired)
 			return;
-		this.ballFired = true;
-		//this.ball.fire((this.x + this.width)/2, this.y);
 		this.ball.fire();
 	}
 	update()
@@ -89,7 +88,7 @@ export default class Paddle
 		}		
 
 		this.x += this.speed;
-		if (!this.ballFired)
+		if (!this.ball.fired)
 			this.ball.updatePos(this.x + this.width/2, this.y);
 	}
 	render(ctx)
@@ -117,6 +116,15 @@ export default class Paddle
 	    ctx.stroke();
 
 		ctx.strokeRect(this.x + this.triangularPartsLength, this.y, this.width - this.triangularPartsLength*2, this.height);
+
+		// render a tooltip
+		if (!this.ball.fired)
+		{
+			ctx.font = '16px courier';
+			ctx.fillStyle = 'white';
+			var space = 'Press space';
+			ctx.fillText(space, this.x + this.width/2 - ctx.measureText(space).width/2, this.y + 14);
+		}	
 
 		ctx.restore();
 	}
