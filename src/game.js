@@ -84,13 +84,17 @@ export default class Game
 	}
 	winScreen()
 	{
-		new Audio('sounds/win.wav').play();
+		var effect = new Audio('sounds/win.wav')
+		effect.volume = 0.5;
+		effect.play();
 		this.drawSplashScreen('#009900', ['You cleared all the bricks!',(' You scored ' + this.score + ' points.')]);
 	}
 	lossScreen()
 	{
-		new Audio('sounds/loss.wav').play();
-		this.drawSplashScreen('#990000',['You lost!',('You scored ' + this.score + ' points.')]);
+		var effect = new Audio('sounds/loss.wav')
+		effect.volume = 0.5;
+		effect.play();
+		this.drawSplashScreen('#990000',['You lost!',('You scored ' + this.score + ' points.'),'Press F5 to play again.']);
 
 		// draw the credits
 		var d = document.createElement('div');
@@ -99,12 +103,14 @@ export default class Game
 		var link = document.createElement('a');
 		link.setAttribute('href', 'https://opengameart.org/content/8-bit-sound-effects-library');
 		link.innerHTML = 'https://opengameart.org/content/8-bit-sound-effects-library';
-		d.appendChild(link);		
+		d.appendChild(link);
 	}
 	
 	continueScreen()
 	{
-		new Audio('sounds/round.wav').play();
+		var effect = new Audio('sounds/round.wav')
+		effect.volume = 0.5;
+		effect.play();
 		this.drawSplashScreen('#999900', [('You have ' + (this.lives-1) + ' ball' + (this.lives-1===1?'':'s') +  ' left.'),
 										  ('Continuing in ' + this.turnTimeout/1000 + ' seconds...')]);
 	}
@@ -117,12 +123,18 @@ export default class Game
 
 		this.ctx.font = '16px courier';
 		this.ctx.fillStyle = 'white';
-
-		for (var i = 0; i < text.length; i++) 
+		// a very convoluted way to draw a variable number of text lines
+		var lineHeight = (this.canvas.height*1/6)/(2*text.length + 1);
+		var j = 0;
+		for (var i = 0; i < 2*text.length + 1; i++) 
 		{
-			this.ctx.fillText(text[i], this.canvas.width/2 - this.ctx.measureText(text[i]).width/2, 
-				(this.canvas.height*7/12 - 8 + 24*i));
+			if (i%2 == 0)
+				continue;
+			this.ctx.fillText(text[j], this.canvas.width/2 - this.ctx.measureText(text[j]).width/2, 
+				(this.canvas.height*1/2 + 8 + lineHeight*i));
+			j++;
 		}
+
 		this.ctx.restore();
 
 	}

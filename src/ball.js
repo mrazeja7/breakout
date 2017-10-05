@@ -20,14 +20,20 @@ export default class Ball
 	{
 		this.speedFactor *= factor;	
 		if (this.fired)
-			new Audio('sounds/speedup.wav').play();
+		{
+			var effect = new Audio('sounds/speedup.wav');
+			effect.volume = 0.5;
+			effect.play();
+		}
 	}
 	fire()
 	{
 		this.xVelocity = (this.x - this.canvasDims.width/2) / 30;
-		this.yVelocity = -4 * this.speedFactor;
+		this.yVelocity = -4;
 		this.y -= 10;
-		new Audio('sounds/fire.wav').play();
+		var effect = new Audio('sounds/fire.wav');
+		effect.volume = 0.5;
+		effect.play();
 		this.fired = true;
 	}
 	update(paddle, bricks)
@@ -54,7 +60,11 @@ export default class Ball
 			arg = 'down';
 
 		if (arg !== '')
-			new Audio('sounds/wallbounce.wav').play();
+		{
+			var effect = new Audio('sounds/wallbounce.wav');
+			effect.volume = 0.5;
+			effect.play();
+		}
 		this.bounce(arg);
 	}
 
@@ -70,7 +80,9 @@ export default class Ball
 		{
 			// change xVelocity based on the collision "angle"
 			this.xVelocity = (this.x - (paddle.x + paddle.width/2)) / 20;			
-			new Audio('sounds/paddlebounce.wav').play();
+			var effect = new Audio('sounds/paddlebounce.wav');
+			effect.volume = 0.5;
+			effect.play();
 			this.bounce('up')
 		}
 	}
